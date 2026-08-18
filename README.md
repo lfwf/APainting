@@ -1,6 +1,33 @@
-# APainting Codex MVP v4
+# APainting Codex MVP v5
 
 A two-pass AI-assisted drawing compiler specialized for elegant botanical single-line stationery illustrations.
+
+
+## Recommended Codex-native workflow (V5)
+
+For the common case where you attach an image directly to Codex and want Codex itself to use its vision, do **not** ask it to design a solution first. Paste `CODEX_ONE_SHOT_PROMPT.txt` together with the image. The repository instructions route the task through an existing deterministic runbook.
+
+```bash
+apainting codex-start input.png --out runs/latest
+# Codex reads runs/latest/CODEX_RUNBOOK.md and writes scene_plan.json
+apainting validate runs/latest --stage pass1
+# Codex writes structure_plan.json using analysis/unit_views/*.png
+apainting validate runs/latest --stage pass2
+apainting finalize runs/latest --duration 18 --max-height 1080
+apainting serve runs/latest --port 8000
+```
+
+The key change is that Pass 1 defaults to **Visual Token ownership**, not manually painted semantic polygons. Validation tells Codex exactly what remains unresolved, so it fixes only that layer instead of entering a new design/review cycle.
+
+Useful commands:
+
+```bash
+apainting status runs/latest
+apainting inspect runs/latest --times 1 3 5
+apainting validate runs/latest --stage final
+```
+
+See `CODEX_IMAGE_TASK.md`, `examples/STREAM_EXAMPLE.md`, and `examples/MOUNTAIN_EXAMPLE.md`.
 
 ## Architecture
 

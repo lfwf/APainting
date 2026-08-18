@@ -1,0 +1,9 @@
+APainting执行模式：用我刚刚附加的图片生成完整可播放动画并加载到 Studio。
+
+这是“运行现有程序处理图片”的任务，不是修改代码或重新设计功能。请严格按仓库根目录 CODEX_IMAGE_TASK.md 执行：不要使用 brainstorming / writing-plans / executing-plans 来生成规格或实施计划，不要问我确认主体数量或是否开始；除非有真实命令错误，否则直接做到可播放预览。
+
+使用 runs/latest。流程必须是：codex-start → Pass 1 token ownership → validate pass1 → Pass 2 structure → validate pass2 → finalize → 检查 1s/3s/5s → serve。
+
+Pass 1 默认用 visual token_ids，不要手工画 bbox/polygon/corridor 来分主体；bbox_hint 永远不能用于 ownership。Pass 2 不能重新分配主体。
+
+最终只告诉我 Studio URL、preview 路径、1/3/5s 截图路径、path grounding/unresolved 数量和当前大主体顺序。
