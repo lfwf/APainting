@@ -31,6 +31,25 @@ def _write_frame(writer: cv2.VideoWriter, rgb: np.ndarray, scale: float) -> None
     writer.write(cv2.cvtColor(frame, cv2.COLOR_RGB2BGR))
 
 
+def _open_video_writer(output_path: Path, fps: int, out_size: tuple[int, int]) -> cv2.VideoWriter:
+    """Open a writer whose codec matches the output container.
+
+    Chromium cannot decode OpenCV's MPEG-4 Part 2 ``mp4v`` output, while VP9
+    in a WebM container is broadly supported by modern browsers.
+    """
+    codec = "VP90" if output_path.suffix.lower() == ".webm" else "mp4v"
+    writer = cv2.VideoWriter(
+        str(output_path),
+        cv2.VideoWriter_fourcc(*codec),
+        fps,
+        out_size,
+    )
+    if not writer.isOpened():
+        container = "WebM/VP9" if codec == "VP90" else "MP4/mp4v"
+        raise RuntimeError(f"could not open {container} writer; install an OpenCV build with {container} support")
+    return writer
+
+
 def render_video(
     run_dir: Path,
     plan: ReplayPlan,
@@ -51,14 +70,7 @@ def render_video(
     scale = 1.0 if max_height <= 0 else min(1.0, max_height / h)
     out_size = (max(2, int(round(w * scale))), max(2, int(round(h * scale))))
     output_path.parent.mkdir(parents=True, exist_ok=True)
-    writer = cv2.VideoWriter(
-        str(output_path),
-        cv2.VideoWriter_fourcc(*"mp4v"),
-        fps,
-        out_size,
-    )
-    if not writer.isOpened():
-        raise RuntimeError("could not open MP4 writer; install an OpenCV build with MP4 support")
+    writer = _open_video_writer(output_path, fps, out_size)
 
     canvas = paper.copy()
     total_frames = max(1, int(duration * fps))

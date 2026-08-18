@@ -40,6 +40,11 @@ class ExportRequest(BaseModel):
     duration: float = Field(default=18.0, ge=2.0, le=120.0)
 
 
+def _preview_url(run_dir: Path) -> str:
+    webm = run_dir / "outputs" / "replay.webm"
+    return "/outputs/replay.webm" if webm.exists() else "/outputs/replay.mp4"
+
+
 def _load_scene(run_dir: Path) -> ScenePlan:
     path = run_dir / "scene_plan.json"
     if not path.exists():
@@ -132,7 +137,7 @@ def create_app(run_dir: Path) -> FastAPI:
             "dependency_violations": dependency_violations(scene, current),
             "history": list_order_history(run_dir),
             "event_count": event_count,
-            "video_url": "/outputs/replay.mp4",
+            "video_url": _preview_url(run_dir),
         }
 
     @app.post("/api/unit-order")
@@ -145,7 +150,7 @@ def create_app(run_dir: Path) -> FastAPI:
                 replay = compile_plan(run_dir)
                 report = None
                 if req.render_preview:
-                    report = render(run_dir, fps=24, duration=12.0, max_height=720, output_name="replay.mp4")
+                    report = render(run_dir, fps=24, duration=12.0, max_height=720, output_name="replay.webm")
                 write_web_ui(run_dir)
                 return {
                     "ok": True,
@@ -176,7 +181,7 @@ def create_app(run_dir: Path) -> FastAPI:
                 replay = compile_plan(run_dir)
                 report = None
                 if req.render_preview:
-                    report = render(run_dir, fps=24, duration=12.0, max_height=720, output_name="replay.mp4")
+                    report = render(run_dir, fps=24, duration=12.0, max_height=720, output_name="replay.webm")
                 return {"ok": True, "unit_order": replay.unit_order, "render_report": report}
             except Exception as exc:
                 raise HTTPException(status_code=400, detail=str(exc)) from exc

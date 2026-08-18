@@ -126,6 +126,7 @@ def main() -> None:
             print(json.dumps(compiled, ensure_ascii=False, indent=2))
             raise SystemExit(2)
         render_report = render(args.run_dir, args.fps, args.duration, args.max_height)
+        render(args.run_dir, args.fps, args.duration, args.max_height, output_name="replay.webm", auxiliary=False)
         inspection = inspect_video(args.run_dir, times=(1.0, 3.0, 5.0))
         final = validate_stage(args.run_dir, stage="final", min_path_grounding=args.min_path_grounding, require_structure_all=True)
         print(json.dumps({"validation": final, "render": render_report, "inspection": inspection}, ensure_ascii=False, indent=2))
